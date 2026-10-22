@@ -1,0 +1,553 @@
+.scan-card,
+.chat-card,
+.systems-card,
+.firmware-card,
+.service-card {
+  --pad: clamp(16px, 1.6vw, 26px);
+  display: flex;
+  flex-direction: column;
+  padding: var(--pad);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* --- battery cell scan ------------------------------------------------------------- */
+
+.scan-run {
+  flex: none;
+}
+
+.cells-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 20px 0 16px;
+}
+
+.cells {
+  height: 100%;
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: clamp(4px, 0.45vw, 7px);
+}
+
+.cell {
+  position: relative;
+  min-height: 0;
+  border-radius: 5px;
+  border: 1px solid rgb(255 255 255 / 0.07);
+  background: linear-gradient(180deg, #1f2125, #1a1c1f);
+  transition: border-color 0.35s ease;
+}
+
+/* The terminal nub on each cell. */
+.cell::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 32%;
+  width: 36%;
+  height: 2px;
+  border-radius: 1px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.cell::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  height: calc(var(--charge, 90%) - 16%);
+  border-radius: 3px;
+  background: #34373d;
+  transition:
+    background 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.cell[data-state='hot'] {
+  border-color: rgb(255 140 90 / 0.75);
+}
+
+.cell[data-state='hot']::after {
+  background: var(--ember-hot);
+  box-shadow:
+    0 0 12px var(--ember),
+    0 0 2px #fff;
+  transition-duration: 0.05s;
+}
+
+.cell[data-state='ok']::after {
+  background: linear-gradient(180deg, #cfd2d6, #8f9298);
+}
+
+.cell[data-state='watch'] {
+  border-color: rgb(232 176 74 / 0.6);
+}
+
+.cell[data-state='watch']::after {
+  background: #e8b04a;
+}
+
+.scan-beam {
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  left: 0;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, #fff3ea 20%, var(--ember) 50%, #fff3ea 80%, transparent);
+  box-shadow:
+    0 0 16px 3px rgb(255 106 43 / 0.7),
+    0 0 46px 8px rgb(255 106 43 / 0.25);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* The wake behind the beam: freshly scanned cells sit in warm light. */
+.scan-beam::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 2px;
+  width: 90px;
+  background: linear-gradient(90deg, transparent, rgb(255 106 43 / 0.16));
+}
+
+.scan-stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.scan-stats dt {
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+.scan-stats dd {
+  margin: 4px 0 0;
+  font-size: clamp(14px, 1.15vw, 18px);
+  font-weight: 560;
+  font-stretch: 115%;
+  white-space: nowrap;
+}
+
+/* --- chat ------------------------------------------------------------------------------- */
+
+.chat-card {
+  gap: 14px;
+}
+
+.chat-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--ink-2);
+}
+
+.agent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.025);
+}
+
+.agent-avatar {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #ff8b4d, #d9481a);
+  box-shadow: 0 0 0 3px rgb(255 106 43 / 0.15);
+  font-weight: 650;
+  font-stretch: 120%;
+  color: #fff;
+}
+
+.agent strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.agent span {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.chat-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.chat-list > :first-child {
+  margin-top: auto;
+}
+
+.bubble {
+  max-width: 88%;
+  margin: 0;
+  padding: 10px 13px;
+  border-radius: 14px 14px 14px 4px;
+  border: 1px solid var(--line);
+  background: #282b30;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-1);
+}
+
+.bubble[data-from='me'] {
+  align-self: flex-end;
+  border-color: transparent;
+  border-radius: 14px 14px 4px 14px;
+  background: linear-gradient(160deg, #ff7c3f, #e2541c);
+  box-shadow: 0 8px 20px -10px rgb(255 106 43 / 0.9);
+  color: #fff;
+}
+
+.bubble--typing {
+  width: max-content;
+  display: inline-flex;
+  gap: 4px;
+  padding: 13px 14px;
+}
+
+.bubble--typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-2);
+  animation: typing 1s ease-in-out infinite;
+}
+
+.bubble--typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.bubble--typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+    opacity: 0.4;
+  }
+  30% {
+    translate: 0 -4px;
+    opacity: 1;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  transition: opacity 0.3s ease;
+}
+
+.chips[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip {
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 106 43 / 0.45);
+  background: rgb(255 106 43 / 0.08);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 560;
+  color: var(--ink-1);
+  transition: background 0.25s ease;
+}
+
+.chip:is(:hover, .is-vhover) {
+  background: rgb(255 106 43 / 0.18);
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 6px 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: #1b1d21;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.composer-send {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ember);
+  box-shadow: 0 0 14px rgb(255 106 43 / calc(0.5 * var(--power)));
+  cursor: pointer;
+  color: #fff;
+}
+
+/* --- systems ---------------------------------------------------------------------------------- */
+
+.systems {
+  flex: 1;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  align-content: center;
+}
+
+.systems li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.systems li:last-child {
+  border-bottom: 0;
+}
+
+.system-mark {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-3);
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.system-mark svg {
+  display: none;
+  grid-area: 1 / 1;
+}
+
+.systems li[data-state='checking'] .system-mark svg:first-child {
+  display: block;
+  color: var(--ember);
+}
+
+.systems li[data-state='ok'] .system-mark {
+  border-color: transparent;
+  background: var(--ink-1);
+}
+
+.systems li[data-state='ok'] .system-mark svg:last-child {
+  display: block;
+  color: #16181b;
+}
+
+.systems li[data-state='warn'] .system-mark {
+  border-color: transparent;
+  background: #e8b04a;
+}
+
+.system-name {
+  font-size: 12.5px;
+}
+
+.system-result {
+  font-size: 11.5px;
+  font-weight: 600;
+  font-stretch: 112%;
+  color: var(--ink-3);
+  transition: color 0.3s ease;
+}
+
+.systems li[data-state='idle'] .system-result {
+  opacity: 0.45;
+}
+
+.systems li[data-state='ok'] .system-result {
+  color: var(--ink-1);
+}
+
+.systems li[data-state='warn'] .system-result {
+  color: #e8b04a;
+}
+
+/* --- firmware ---------------------------------------------------------------------------------- */
+
+.firmware-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.fw-ring {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex: none;
+}
+
+.fw-ring > svg {
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+}
+
+.fw-track,
+.fw-value {
+  fill: none;
+  stroke-width: 6;
+}
+
+.fw-track {
+  stroke: rgb(255 255 255 / 0.07);
+}
+
+.fw-value {
+  stroke: var(--ember);
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px var(--ember));
+}
+
+/* No round-cap dot at 0%: the arc only appears once the update starts. */
+.firmware-body[data-state='ready'] .fw-value {
+  opacity: 0;
+}
+
+.firmware-body[data-state='done'] .fw-value {
+  stroke: var(--ink-1);
+  filter: none;
+}
+
+.fw-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink-2);
+}
+
+.firmware-body[data-state='done'] .fw-center {
+  color: var(--ink-1);
+}
+
+.fw-pct {
+  font-size: 15px;
+  font-weight: 600;
+  font-stretch: 115%;
+  color: var(--ink-1);
+}
+
+.fw-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.fw-text span {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.fw-button {
+  align-self: flex-start;
+}
+
+/* --- service (steel) ------------------------------------------------------------------------------ */
+
+.service-card .card-title {
+  color: var(--steel-ink);
+}
+
+.service-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.service-figure .card-note {
+  margin: 0;
+}
+
+.service-days {
+  font-size: clamp(30px, 2.6vw, 46px);
+}
+
+.service-bar {
+  height: 6px;
+  margin-top: auto;
+  border-radius: 999px;
+  background: rgb(26 27 30 / 0.18);
+  overflow: hidden;
+}
+
+.service-bar span {
+  display: block;
+  width: 61%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--steel-ink);
+  transform-origin: left;
+}
+
+/* --- narrower frames --------------------------------------------------------------------------------- */
+
+@container stage (max-width: 760px) {
+  .scan-card .card-head {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .scan-card {
+    min-height: 600px;
+  }
+
+  .chat-card {
+    min-height: 540px;
+  }
+
+  .scan-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cells {
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+  }
+}

@@ -1,9 +1,9 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Bell, LayoutGrid } from 'lucide-react';
 import { gsap } from '../lib/gsap';
+import { goTo } from '../motion/screens';
+import { SCREENS, useSystem } from '../state/system';
 import './nav.css';
-
-const TABS = ['Dashboard', 'Statistics', 'Support', 'Settings'];
 
 function LogoMark() {
   return (
@@ -15,7 +15,8 @@ function LogoMark() {
 }
 
 export function Nav() {
-  const [active, setActive] = useState(0);
+  const screen = useSystem((s) => s.screen);
+  const active = SCREENS.findIndex((s) => s.id === screen);
   const tabsRef = useRef<HTMLDivElement>(null);
   const markRef = useRef<HTMLSpanElement>(null);
   const first = useRef(true);
@@ -43,15 +44,16 @@ export function Nav() {
       </div>
       <nav className="tabs-wrap" aria-label="Main">
         <div className="tabs" ref={tabsRef}>
-          {TABS.map((tab, i) => (
+          {SCREENS.map((s, i) => (
             <button
-              key={tab}
+              key={s.id}
               type="button"
               className="tab"
+              data-screen={s.id}
               aria-current={i === active ? 'page' : undefined}
-              onClick={() => setActive(i)}
+              onClick={() => goTo(s.id)}
             >
-              {tab}
+              {s.label}
             </button>
           ))}
         </div>

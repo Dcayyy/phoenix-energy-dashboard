@@ -283,8 +283,8 @@ class VirtualMouse {
       .call(() => this.release(true), [], 0.12);
   }
 
-  /** Press, drag horizontally by `dx` board pixels, release. */
-  drag(dx: number, duration = 0.8, ease = 'power2.inOut') {
+  /** Press, drag by (dx, dy) board pixels, release. A flat drag gets a little natural sag. */
+  drag(dx: number, duration = 0.8, ease = 'power2.inOut', dy = dx * -0.04) {
     const tween = { p: 0 };
     let from: Point = { ...this.pos };
     return gsap
@@ -301,7 +301,7 @@ class VirtualMouse {
           ease,
           onUpdate: () => {
             this.pos.x = from.x + dx * tween.p;
-            this.pos.y = from.y - dx * 0.04 * tween.p;
+            this.pos.y = from.y + dy * tween.p;
             this.sync();
           },
         },
@@ -328,13 +328,119 @@ export function stopDemo() {
 
 export const isDemoPlaying = () => active !== null;
 
+export type SceneName = 'dashboard' | 'statistics' | 'support' | 'settings';
+const TOUR: SceneName[] = ['dashboard', 'statistics', 'support', 'settings'];
+
+type Kit = {
+  camera: Camera;
+  mouse: VirtualMouse;
+  /** Zoom for the wide layout, and a gentler one for the 9:16 frame. */
+  z: (wide: number, tall?: number) => number;
+  flick: () => void;
+};
+
+const tab = (id: SceneName): Target => () => $(`.tab[data-screen="${id}"]`);
+const inScreen = (id: SceneName, selector: string): Target => () => $(`.board[data-screen="${id}"] ${selector}`);
+
+/** Click a nav tab; the scan transition takes about 1.5 s. */
+const visit = (k: Kit, id: SceneName) => gsap.timeline().add(k.mouse.moveTo(tab(id), 1)).add(k.mouse.click(), '+=0.1');
+
+const SCENES: Record<SceneName, (k: Kit) => gsap.core.Timeline> = {
+  // Ports switched on one by one, a port added, the station spun, powered down and struck back to life.
+  dashboard: ({ camera, mouse, z, flick }) => {
+    const toggle = (id: string): Target => () => $(`.port[data-id="${id}"] .toggle`);
+    const cable = (id: string) => () => $(`.cable-hit[data-port="${id}"]`) as SVGPathElement | null;
+    return gsap
+      .timeline()
+      .add(camera.focus(() => $('.flow-card'), z(1.3), 1.6), 0)
+      .add(mouse.moveTo(toggle('usb-c-1'), 1.2), 0.3)
+      .add(mouse.click(), 1.65)
+      .add(mouse.glide(() => mouse.pointOn(cable('usb-c-1')(), 0.8), 0.8), 2.5)
+      .add(mouse.trace(cable('usb-c-1'), 0.8, 0.38, 1.4), 3.3)
+      .add(mouse.moveTo(toggle('sec-ac'), 0.8), 4.8)
+      .add(mouse.click(), 5.7)
+      .add(mouse.moveTo(() => $('.add-port'), 0.9), 6.5)
+      .add(mouse.click(), 7.5)
+      .add(mouse.moveTo(toggle('wireless'), 0.9), 8.6)
+      .add(mouse.click(), 9.6)
+      .add(camera.reset(1.4), 10.6)
+      .add(mouse.moveTo(() => $('.device-stage'), 1.1, 0.62, 0.55), 10.8)
+      // A flick: the drag accelerates, then the station coasts round a full turn.
+      .add(mouse.drag(-190, 0.55, 'power2.in'), 12.1)
+      .call(flick, [], 12.8)
+      .add(camera.focus(() => $('.device-card'), z(1.32), 1.4), 13.2)
+      .add(mouse.moveTo(() => $('.knob'), 1), 13.5)
+      .add(mouse.click(), 14.7)
+      .add(camera.reset(1.6), 15.5)
+      .add(mouse.moveTo(() => $('.knob'), 0.5), 17.3)
+      .add(mouse.click(), 18)
+      .add(camera.focus(() => $('.board[data-screen="dashboard"]'), z(1.06), 3.2), 18.5)
+      .add(camera.reset(1.2), 21.9);
+  },
+
+  // The chart morphs Week → Month → Year, with a hover sweep across it.
+  statistics: (k) => {
+    const { camera, mouse, z } = k;
+    const period = (label: string): Target => () => $(`.stats-hero .segmented-option[data-id="${label}"]`);
+    const plot = inScreen('statistics', '.chart-hit');
+    return gsap
+      .timeline()
+      .add(visit(k, 'statistics'), 0)
+      .add(camera.focus(inScreen('statistics', '.stats-hero'), z(1.25), 1.4), 2.4)
+      .add(mouse.moveTo(period('month'), 1), 2.6)
+      .add(mouse.click(), 3.9)
+      .add(mouse.moveTo(plot, 0.8, 0.12, 0.42), 5)
+      .add(mouse.moveTo(plot, 2.2, 0.88, 0.5), 5.9)
+      .add(mouse.moveTo(period('year'), 0.9), 8.3)
+      .add(mouse.click(), 9.3)
+      .add(camera.reset(1.4), 10.6);
+  },
+
+  // Mira offers a check, the 96 cells are scanned, she reports back, firmware updates.
+  support: (k) => {
+    const { camera, mouse, z } = k;
+    return gsap
+      .timeline()
+      .add(visit(k, 'support'), 0)
+      .add(camera.focus(inScreen('support', '.chat-card'), z(1.22), 1.4), 2.6)
+      .add(mouse.moveTo(inScreen('support', '.chip'), 1), 4.4)
+      .add(mouse.click(), 5.5)
+      .add(camera.focus(inScreen('support', '.scan-card'), z(1.2), 1.4), 6.1)
+      .add(camera.focus(inScreen('support', '.chat-card'), z(1.22), 1.3), 10.9)
+      .add(camera.reset(1.3), 13.4)
+      .add(mouse.moveTo(inScreen('support', '.fw-button'), 1), 13.6)
+      .add(mouse.click(), 14.8)
+      .to({}, { duration: 2.4 });
+  },
+
+  // The dial swings Eco → X-Boost, the charge limit is dragged up, then home to the dashboard.
+  settings: (k) => {
+    const { camera, mouse, z } = k;
+    const mode = (id: string): Target => () => $(`.dial-label[data-mode="${id}"]`);
+    return gsap
+      .timeline()
+      .add(visit(k, 'settings'), 0)
+      .add(camera.focus(inScreen('settings', '.mode-card'), z(1.22), 1.4), 2.5)
+      .add(mouse.moveTo(mode('eco'), 1), 2.9)
+      .add(mouse.click(), 4.1)
+      .add(mouse.moveTo(mode('boost'), 1), 5.5)
+      .add(mouse.click(), 6.6)
+      .add(camera.focus(inScreen('settings', '.limit-card'), z(1.15), 1.4), 8)
+      .add(mouse.moveTo(inScreen('settings', '.battery'), 1, 0.5, 0.22), 8.3)
+      .add(mouse.drag(0, 0.9, 'power2.inOut', -46), 9.5)
+      .add(camera.reset(1.4), 11)
+      .add(visit(k, 'dashboard'), 11.4)
+      .to({}, { duration: 1.6 });
+  },
+};
+
 /**
- * A 26-second scripted take for screen recording: the boot sequence, ports
- * switched on one by one, a port added, the station spun, powered down and
- * struck back to life. Press D to play, Esc to stop. `zoom: false` keeps the
- * camera still, for recorders that zoom on their own.
+ * A scripted take for screen recording: the boot, then each scene in turn,
+ * driven by a drawn cursor while a camera zooms in on the action. The full
+ * tour runs about 70 seconds. Press D to play, Esc to stop. `zoom: false`
+ * keeps the camera still, for recorders that zoom on their own.
  */
-export function playDemo({ zoom = true }: { zoom?: boolean } = {}) {
+export function playDemo({ zoom = true, scenes = TOUR }: { zoom?: boolean; scenes?: SceneName[] } = {}) {
   stopDemo();
   const cameraEl = $('.camera') as HTMLElement | null;
   if (!cameraEl) return null;
@@ -349,10 +455,13 @@ export function playDemo({ zoom = true }: { zoom?: boolean } = {}) {
   root.classList.add('is-demo');
   scene?.setDetail(1.6);
 
-  const toggle = (id: string): Target => () => $(`.port[data-id="${id}"] .toggle`);
-  const cable = (id: string) => () => $(`.cable-hit[data-port="${id}"]`) as SVGPathElement | null;
-  // The 9:16 frame is already a close-up, so it zooms less than the wide layout.
-  const z = (wide: number, tall = 1 + (wide - 1) * 0.4) => (!zoom ? 1 : camera.portrait ? tall : wide);
+  const kit: Kit = {
+    camera,
+    mouse,
+    // The 9:16 frame is already a close-up, so it zooms less than the wide layout.
+    z: (wide, tall = 1 + (wide - 1) * 0.4) => (!zoom ? 1 : camera.portrait ? tall : wide),
+    flick: () => scene?.flick(),
+  };
 
   const cleanup = () => {
     mouse.dispose();
@@ -371,41 +480,14 @@ export function playDemo({ zoom = true }: { zoom?: boolean } = {}) {
     },
   });
 
-  tl.add(boot(), 0)
-    // 1. Switch on the first USB-C port and watch the current race down the cable.
-    .add(camera.focus(() => $('.flow-card'), z(1.3), 1.6), 3.1)
-    .add(mouse.show({ x: cameraEl.offsetWidth * 0.98, y: cameraEl.offsetHeight * 0.92 }), 3.3)
-    .add(mouse.moveTo(toggle('usb-c-1'), 1.2), 3.4)
-    .add(mouse.click(), 4.75)
-    // 2. Trace the cable back toward the source; the tooltip reads its share.
-    .add(mouse.glide(() => mouse.pointOn(cable('usb-c-1')(), 0.8), 0.8), 5.6)
-    .add(mouse.trace(cable('usb-c-1'), 0.8, 0.38, 1.4), 6.4)
-    // 3. Sec-AC on.
-    .add(mouse.moveTo(toggle('sec-ac'), 0.8), 7.9)
-    .add(mouse.click(), 8.8)
-    // 4. Add a sixth port and power it.
-    .add(mouse.moveTo(() => $('.add-port'), 0.9), 9.6)
-    .add(mouse.click(), 10.6)
-    .add(mouse.moveTo(toggle('wireless'), 0.9), 11.7)
-    .add(mouse.click(), 12.7)
-    // 5. Pull back, then spin the station.
-    .add(camera.reset(1.4), 13.7)
-    .add(mouse.moveTo(() => $('.device-stage'), 1.1, 0.62, 0.55), 13.9)
-    // A flick: the drag accelerates, then the station coasts round a full turn.
-    .add(mouse.drag(-190, 0.55, 'power2.in'), 15.2)
-    .call(() => scene?.flick(), [], 15.9)
-    // 6. Push in on the power knob and switch everything off.
-    .add(camera.focus(() => $('.device-card'), z(1.32), 1.4), 16.3)
-    .add(mouse.moveTo(() => $('.knob'), 1), 16.6)
-    .add(mouse.click(), 17.8)
-    // 7. Pull back to watch the board go dark, then strike it back to life.
-    .add(camera.reset(1.6), 18.6)
-    .add(mouse.moveTo(() => $('.knob'), 0.5), 20.4)
-    .add(mouse.click(), 21.1)
-    .add(camera.focus(() => $('.board'), z(1.06), 3.2), 21.6)
-    .add(mouse.hide(), 23.6)
-    .add(camera.reset(1.4), 25)
-    .to({}, { duration: 0.6 });
+  tl.add(boot(), 0).add(mouse.show({ x: cameraEl.offsetWidth * 0.98, y: cameraEl.offsetHeight * 0.92 }), 3.3);
+  let at = 3.1;
+  for (const name of scenes.filter((n) => n in SCENES)) {
+    const part = SCENES[name](kit);
+    tl.add(part, at);
+    at += part.duration() + 0.2;
+  }
+  tl.add(mouse.hide(), at).add(camera.reset(1), at).to({}, { duration: 0.6 });
 
   active = { tl, cleanup };
   return tl;

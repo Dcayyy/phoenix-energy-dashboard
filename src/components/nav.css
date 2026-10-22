@@ -121,9 +121,14 @@
     scrollbar-width: none;
   }
 
+  .tabs {
+    justify-content: space-between;
+  }
+
   .tab {
-    padding: 8px 9px;
-    font-size: 10.5px;
-    letter-spacing: 0.05em;
+    padding: 8px 5px;
+    font-size: 10px;
+    font-stretch: 104%;
+    letter-spacing: 0.04em;
   }
 }

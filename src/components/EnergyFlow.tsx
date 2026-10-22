@@ -438,7 +438,7 @@ export function EnergyFlow() {
   return (
     <section
       ref={cardRef}
-      className={`card flow-card${hover ? ' is-hovering' : ''}`}
+      className={`card flow-card slot-hero${hover ? ' is-hovering' : ''}`}
       aria-labelledby="flow-title"
       onPointerMove={onMove}
     >

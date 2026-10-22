@@ -37,7 +37,7 @@ export function DeviceCard() {
   }, []);
 
   return (
-    <section className="card device-card" aria-labelledby="device-title">
+    <section className="card device-card slot-side" aria-labelledby="device-title">
       <i className="card-trace" aria-hidden />
       <div className="device-hero">
         <div className="device-stage" ref={stageRef} />

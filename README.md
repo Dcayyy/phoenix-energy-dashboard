@@ -2,9 +2,15 @@
 
 An IoT energy-management dashboard with a live 3D power station, energy that
 physically flows through the cables, and one orchestrated power-on sequence.
-Pure front end: no backend, no API keys, no integrations.
+Four screens (Dashboard, Statistics, Support, Settings), joined by a scan of
+light that prints each new screen as it sweeps down. Pure front end: no
+backend, no API keys, no integrations.
 
 ![Phoenix energy dashboard](docs/preview.jpg)
+
+| Dashboard | Statistics | Support | Settings |
+| --- | --- | --- | --- |
+| ![Dashboard in the 9:16 reel frame](docs/reel-dashboard.jpg) | ![Statistics](docs/reel-statistics.jpg) | ![Support, mid-scan](docs/reel-support.jpg) | ![Settings](docs/reel-settings.jpg) |
 
 Design reference: [IoT Energy Management Dashboard ✦ Phoenix](https://dribbble.com/shots/24882387-IoT-Energy-Management-Dashboard-Phoenix)
 by HALO LAB on Dribbble. This project rebuilds that shot in code. The 3D scene,
@@ -23,31 +29,40 @@ Open http://127.0.0.1:5190. Needs Node 20.19+ or 22.12+.
 
 | Key | What it does |
 | --- | --- |
+| `1`–`4` | Switch screens |
 | `R` | Replay the boot sequence |
 | `P` | Switch the station off and on |
-| `D` | Play the scripted demo (about 26 seconds) |
-| `Esc` | Stop the demo |
+| `D` | Play the scripted tour of all four screens (about 70 seconds) |
+| `Esc` | Stop the tour |
 
-You can also click the port switches, hover a cable to read its share of the
-output, add a port, drag the 3D station to spin it, and press the power knob.
+Everything is clickable too. On the dashboard: port switches, cables (hover for
+their share), add a port, drag the 3D station, the power knob. Statistics: the
+period switch morphs the chart, and the chart has a hover readout. Support: run
+a diagnostic from the card or the chat, install the firmware. Settings: turn
+the power-mode dial, drag the charge limit or the brightness slider.
 
 URL options:
 
 - `?reel` lays the board out in a fixed 9:16 frame, scaled to fit the window.
-- `?demo` plays the demo as soon as the page loads.
+- `?demo` plays the tour as soon as the page loads; `?demo=statistics` (or any
+  comma-separated mix of `dashboard`, `statistics`, `support`, `settings`)
+  plays just those scenes, which is handy for one short clip per screen.
 - `?zoom=off` keeps the demo camera still (useful if your screen recorder zooms on its own).
 - `?motion=full` plays every animation even when the OS asks for reduced motion.
 
 ## Recording a reel
 
-The demo drives the real interface with a drawn cursor while a camera zooms in
-on whatever is happening: boot, three ports switched on, a port added, the
-station spun, powered off, and struck back to life by lightning. It runs about
-27 seconds.
+The tour drives the real interface with a drawn cursor while a camera zooms in
+on whatever is happening. The dashboard boots, ports switch on, a port is added,
+the station is spun, powered off and struck back to life by lightning. Then
+Statistics morphs its chart, Support scans all 96 battery cells while Mira
+reports back, and Settings turns the power-mode dial and drags the charge
+limit. The full tour runs about 70 seconds; each screen alone is 12–23.
 
 **Vertical (Reels, TikTok, Shorts):**
 
-1. Open `http://127.0.0.1:5190/?reel&demo&motion=full` in Chrome and make the window full screen.
+1. Open `http://127.0.0.1:5190/?reel&demo&motion=full` in Chrome and make the window full screen
+   (or `?reel&demo=support&motion=full` for a single screen).
 2. Press `Cmd+Shift+5`, choose *Record Selected Portion*, and draw the box around the 9:16 frame.
 3. Start recording and press `D` to restart the take.
 
@@ -69,7 +84,9 @@ Where things live:
 | File | What's in it |
 | --- | --- |
 | `src/motion/director.ts` | The whole boot and power choreography, in one table |
-| `src/motion/demo.ts` | The scripted demo: drawn cursor and camera |
+| `src/motion/demo.ts` | The scripted tour: drawn cursor, camera and one scene per screen |
+| `src/motion/screens.ts` | Screen switching and the scan transition |
+| `src/screens/` | Statistics, Support and Settings |
 | `src/components/EnergyFlow.tsx` | The energy flow: cables, particles, ports |
 | `src/scene/DeviceScene.ts` | The 3D station, storm, rain and lightning |
 | `src/components/ChargingGauge.tsx` | The charging gauge |

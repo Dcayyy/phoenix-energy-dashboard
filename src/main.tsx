@@ -8,6 +8,7 @@ import { gsap } from './lib/gsap';
 import { boot, currentTimeline, setPower } from './motion/director';
 import { playDemo } from './motion/demo';
 import { activeScene } from './scene/active';
+import { goTo } from './motion/screens';
 
 const params = new URLSearchParams(window.location.search);
 const html = document.documentElement;
@@ -25,7 +26,7 @@ if (params.has('reel')) {
 
 // Dev-only handle for scrubbing the choreography from the console.
 if (import.meta.env.DEV) {
-  Object.assign(window, { __phoenix: { gsap, boot, setPower, playDemo, scene: activeScene, timeline: currentTimeline } });
+  Object.assign(window, { __phoenix: { gsap, boot, setPower, playDemo, goTo, scene: activeScene, timeline: currentTimeline } });
 }
 
 createRoot(document.getElementById('root')!).render(<App />);
