@@ -1,0 +1,114 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(110% 80% at 50% -10%, #353940 0%, transparent 60%),
+    radial-gradient(140% 120% at 50% 120%, #1c1e22 0%, transparent 55%),
+    var(--backdrop);
+  color: var(--ink-1);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 3px;
+}
+
+html[data-booting] .app {
+  visibility: hidden;
+}
+
+/* Wide, light uppercase: the dashboard's voice. */
+.display {
+  margin: 0;
+  font-weight: 300;
+  font-stretch: 125%;
+  line-height: 0.92;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+}
+
+.pill {
+  height: 34px;
+  padding: 0 14px 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(180deg, #30333a, #282b30);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: 118%;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    transform 0.25s var(--ease-out),
+    opacity 0.3s ease;
+}
+
+.pill:is(:hover, .is-vhover):not(:disabled) {
+  background: linear-gradient(180deg, #383c43, #2e3137);
+}
+
+.pill:active {
+  transform: scale(0.95);
+}
+
+.pill:disabled {
+  cursor: default;
+  opacity: 0.45;
+  transform: none;
+}
+
+.pill--small {
+  height: 28px;
+  padding: 0 10px 0 12px;
+  font-size: 9.5px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='full']) *,
+  html:not([data-motion='full']) *::before,
+  html:not([data-motion='full']) *::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+  }
+}

@@ -1,0 +1,376 @@
+.device-card {
+  display: flex;
+  flex-direction: column;
+  background: #17191c;
+}
+
+.device-hero {
+  position: relative;
+  flex: 1.38 1 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.device-stage {
+  position: absolute;
+  inset: 0;
+  /* Shows while WebGL boots, and stays if WebGL is unavailable. */
+  background:
+    radial-gradient(90% 60% at 30% 18%, #3a4247 0%, transparent 70%),
+    linear-gradient(180deg, #14181b 0%, #262c30 58%, #1b1f22 100%);
+}
+
+.device-gl {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.device-gl[data-dragging] {
+  cursor: grabbing;
+}
+
+.device-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(12 14 16 / 0.62) 0%, rgb(12 14 16 / 0) 30%),
+    linear-gradient(0deg, #17191c 0%, rgb(23 25 28 / 0.88) 15%, rgb(23 25 28 / 0) 40%);
+}
+
+.device-head {
+  position: absolute;
+  top: clamp(18px, 2.6vh, 32px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.device-title {
+  font-size: clamp(40px, 3.5vw, 66px);
+  text-align: center;
+  text-shadow: 0 6px 30px rgb(0 0 0 / 0.45);
+}
+
+.mode-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgb(18 20 23 / 0.55);
+  backdrop-filter: blur(10px);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-stretch: 112%;
+  letter-spacing: 0.02em;
+  color: var(--ink-1);
+}
+
+.power-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(12px, 2vh, 22px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+}
+
+.power-label,
+.power-state {
+  font-size: 11px;
+  font-weight: 650;
+  font-stretch: 120%;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.power-label {
+  justify-self: end;
+}
+
+.power-state {
+  justify-self: start;
+  display: flex;
+  gap: 10px;
+}
+
+.power-state b {
+  font-weight: inherit;
+  color: var(--ink-3);
+  transition: color 0.4s ease;
+}
+
+.power-state b[data-active='true'] {
+  color: var(--ink-1);
+}
+
+/* --- knob ------------------------------------------------------------- */
+
+.knob {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a1c1f 56%, #2b2e33 58%, #16181b 74%);
+  box-shadow:
+    0 12px 26px -8px rgb(0 0 0 / 0.75),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.knob:active {
+  transform: scale(0.93);
+}
+
+.knob-ring {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in oklab, var(--ember) calc(var(--power) * 100%), rgb(255 255 255 / 0.3)) 0deg 1.6deg,
+    transparent 1.6deg 10deg
+  );
+  mask: radial-gradient(circle, transparent 25px, #000 25.5px, #000 29px, transparent 29.5px);
+  filter: drop-shadow(0 0 3px rgb(255 106 43 / calc(0.8 * var(--power))));
+}
+
+.knob-cap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(from 200deg, #575c63, #2a2c31 22%, #4a4e55 46%, #25272b 72%, #575c63);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.22),
+    inset 0 -2px 4px rgb(0 0 0 / 0.45),
+    0 3px 10px rgb(0 0 0 / 0.55);
+  color: color-mix(in oklab, var(--ember-hot) calc(var(--power) * 100%), var(--ink-2));
+  transition: rotate 0.7s var(--ease-out);
+}
+
+.knob:is(:hover, .is-vhover) .knob-cap {
+  rotate: 28deg;
+}
+
+.knob-cap svg {
+  filter: drop-shadow(0 0 6px rgb(255 106 43 / calc(0.9 * var(--power))));
+}
+
+.knob-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--ember-hot);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- charging --------------------------------------------------------- */
+
+.charging {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: clamp(14px, 2vh, 22px) 22px clamp(12px, 1.8vh, 18px);
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, #191b1e, #1e2024);
+}
+
+.charging-title {
+  font-size: clamp(16px, 1.3vw, 22px);
+}
+
+.gauge {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.gauge svg {
+  width: 100%;
+  height: 100%;
+  max-width: 320px;
+  overflow: visible;
+}
+
+.gauge-ticks line {
+  stroke: rgb(255 255 255 / 0.16);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  transition: stroke 0.25s ease;
+}
+
+.gauge-ticks line.is-lit {
+  stroke: color-mix(in oklab, var(--ember) calc(var(--power) * 100%), rgb(255 255 255 / 0.16));
+}
+
+.gauge-base,
+.gauge-track,
+.gauge-value,
+.gauge-glow,
+.gauge-shimmer {
+  fill: none;
+  stroke-linecap: butt;
+}
+
+.gauge-base {
+  stroke: #24272b;
+}
+
+.gauge-track {
+  stroke: url(#gauge-track);
+}
+
+.gauge-value {
+  stroke: url(#gauge-value);
+}
+
+.gauge-glow {
+  stroke: var(--ember);
+  opacity: calc(0.45 * var(--power));
+}
+
+.gauge-shimmer {
+  stroke: #fff3ea;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+.gauge-head {
+  fill: #fff7f1;
+  filter: drop-shadow(0 0 5px var(--ember));
+  transition: opacity 0.3s ease;
+}
+
+.gauge-battery rect {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 1.5;
+}
+
+.gauge-battery .gauge-battery-cap,
+.gauge-battery .gauge-battery-fill {
+  fill: var(--ember);
+  stroke: none;
+}
+
+.gauge-battery-fill {
+  animation: battery-charge 1.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+@keyframes battery-charge {
+  0%,
+  100% {
+    scale: 1 0.35;
+  }
+  60% {
+    scale: 1 1;
+  }
+}
+
+.gauge-number {
+  fill: var(--ink-1);
+  font-size: 46px;
+  font-weight: 300;
+  font-stretch: 125%;
+  letter-spacing: -0.01em;
+}
+
+.gauge-percent {
+  font-size: 38px;
+}
+
+.gauge-scale {
+  fill: var(--ink-3);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.charging-foot {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.charging-foot div {
+  display: flex;
+  gap: 6px;
+}
+
+.charging-foot dt {
+  color: var(--ink-3);
+}
+
+.charging-foot dd {
+  margin: 0;
+  font-weight: 620;
+  font-stretch: 112%;
+  color: var(--ink-1);
+}
+
+/* --- narrower screens: the station and the gauge sit side by side, then stack */
+
+@container stage (max-width: 1180px) {
+  .device-card {
+    flex-direction: row;
+  }
+
+  .device-hero {
+    flex: 1.25 1 0;
+    border-radius: var(--radius-card) 0 0 var(--radius-card);
+  }
+
+  .charging {
+    justify-content: center;
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+}
+
+@container stage (max-width: 760px) {
+  .device-card {
+    flex-direction: column;
+  }
+
+  .device-hero {
+    flex: none;
+    height: 400px;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+
+  .charging {
+    flex: none;
+    height: 300px;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}

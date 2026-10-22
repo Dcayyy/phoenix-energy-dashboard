@@ -1,0 +1,488 @@
+.flow-card {
+  --pad: clamp(18px, 1.7vw, 28px);
+}
+
+.flow-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgb(255 255 255 / 0.075) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+  mask-image: radial-gradient(120% 95% at 62% 52%, #000 25%, transparent 82%);
+}
+
+.flow-title {
+  position: absolute;
+  z-index: 2;
+  left: var(--pad);
+  top: calc(var(--pad) + 2px);
+  font-size: clamp(34px, 3.25vw, 60px);
+}
+
+.add-port {
+  position: absolute;
+  z-index: 3;
+  right: var(--pad);
+  top: var(--pad);
+}
+
+/* --- cables ----------------------------------------------------------- */
+
+.flow-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.flow-fx {
+  will-change: transform;
+}
+
+.cable {
+  transition: opacity 0.35s ease;
+}
+
+.flow-card.is-hovering .cable:not([data-active]) {
+  opacity: 0.26;
+}
+
+.cable-shadow,
+.cable-base,
+.cable-sheen,
+.cable-hit,
+.live,
+.live-sheen,
+.live-glow,
+.dots {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.cable-shadow {
+  stroke: rgb(0 0 0 / 0.6);
+}
+
+.cable-base {
+  stroke: url(#cable-grad);
+}
+
+.cable-sheen {
+  stroke: rgb(255 255 255 / 0.1);
+}
+
+.cable-hit {
+  stroke: transparent;
+  pointer-events: stroke;
+  cursor: crosshair;
+}
+
+.terminal {
+  fill: #4a4d54;
+  transition: fill 0.5s ease;
+}
+
+.terminal[data-lit='true'] {
+  fill: color-mix(in oklab, var(--ember) calc(var(--power) * 100%), #4a4d54);
+}
+
+.live {
+  stroke: url(#live-grad);
+}
+
+.live-sheen {
+  stroke: rgb(255 222 198 / 0.6);
+}
+
+.live-glow {
+  stroke: var(--ember);
+  opacity: 0.55;
+}
+
+/* Particles cut out the moment current stops, and ease back in once a cable is full. */
+.dots {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.dots-a[data-on='true'] {
+  opacity: 1;
+  transition-duration: 0.6s;
+}
+
+.dots-b[data-on='true'] {
+  opacity: 0.8;
+  transition-duration: 0.6s;
+}
+
+.dots-a {
+  stroke: #fff3ea;
+  stroke-dasharray: 0.01 26;
+  animation: dots-a var(--dur, 0.5s) linear infinite;
+}
+
+/* Faster streaks overtake the dots, so the current reads as motion, not a dotted line. */
+.dots-b {
+  stroke: rgb(255 214 186 / 0.42);
+  stroke-dasharray: 12 76;
+  animation: dots-b calc(var(--dur, 0.5s) * 1.8) linear infinite;
+}
+
+@keyframes dots-a {
+  to {
+    stroke-dashoffset: -26.01px;
+  }
+}
+
+@keyframes dots-b {
+  to {
+    stroke-dashoffset: -88px;
+  }
+}
+
+.spark {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+/* --- source ----------------------------------------------------------- */
+
+.source {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  translate: 0 -50%;
+}
+
+.source-bar {
+  flex: 1;
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding-left: var(--pad);
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    rgb(52 55 61 / 0) 0%,
+    #34373d 22%,
+    #3a3d43 52%,
+    color-mix(in oklab, #c8521f calc(var(--power) * 100%), #3d4046) 84%,
+    color-mix(in oklab, var(--ember) calc(var(--power) * 100%), #43464c) 100%
+  );
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+.source-title {
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+.source-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-stretch: 116%;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.source-sub svg {
+  color: var(--ink-1);
+}
+
+.source-node {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, #ff8b4d calc(var(--power) * 100%), #4b4e55),
+    color-mix(in oklab, #e9531a calc(var(--power) * 100%), #35383d)
+  );
+  box-shadow:
+    0 0 0 5px rgb(255 106 43 / calc(0.1 * var(--power))),
+    0 0 36px rgb(255 106 43 / calc(0.5 * var(--power))),
+    inset 0 1px 0 rgb(255 255 255 / 0.28);
+}
+
+.source-node::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 16px;
+  border: 1px solid rgb(255 140 90 / calc(0.5 * var(--power)));
+  animation: node-ring 2.4s ease-out infinite;
+  opacity: 0;
+}
+
+@keyframes node-ring {
+  0% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.45;
+  }
+}
+
+.node-flash {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: radial-gradient(circle, rgb(255 190 150 / 0.9), rgb(255 106 43 / 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.node-core {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff6f0;
+  color: color-mix(in oklab, var(--ember) calc(var(--power) * 100%), #6d7178);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+}
+
+/* --- ports ------------------------------------------------------------ */
+
+.ports {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: var(--pad);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.port {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 40px;
+  margin-top: -20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  will-change: transform;
+}
+
+.port-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.port-name {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.port-value {
+  font-size: 12.5px;
+  font-weight: 620;
+  font-stretch: 116%;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-3);
+  transition: color 0.5s ease;
+}
+
+.port[data-on='true'] .port-value {
+  color: color-mix(in oklab, var(--ink-1) calc(var(--power) * 100%), var(--ink-3));
+}
+
+/* --- footer ----------------------------------------------------------- */
+
+.flow-foot {
+  position: absolute;
+  z-index: 2;
+  left: var(--pad);
+  bottom: calc(var(--pad) - 2px);
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+}
+
+.battery {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 5px;
+  align-items: start;
+}
+
+.battery-hours {
+  font-size: clamp(30px, 2.5vw, 44px);
+  line-height: 0.82;
+}
+
+.battery-unit {
+  padding-top: 1px;
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: 120%;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.foot-label {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 650;
+  font-stretch: 120%;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.load {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 22px;
+  border-left: 1px solid var(--line-strong);
+}
+
+.load .foot-label {
+  margin-top: 0;
+}
+
+.wave {
+  --load: 0.6;
+  --amp: calc(0.4 + 0.6 * var(--load));
+  --wave-dur: calc(2.8s - 1.5s * var(--load));
+  width: 84px;
+  height: 24px;
+  overflow: visible;
+}
+
+.wave-line {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  scale: 1 var(--amp);
+  animation: wave-scroll var(--wave-dur) linear infinite;
+}
+
+.wave-dot {
+  fill: color-mix(in oklab, var(--ember) calc(var(--power) * 100%), var(--ink-3));
+  filter: drop-shadow(0 0 4px rgb(255 106 43 / calc(0.9 * var(--power))));
+  animation: wave-dot var(--wave-dur) linear infinite;
+}
+
+@keyframes wave-scroll {
+  to {
+    translate: -42px 0;
+  }
+}
+
+/* A sine, approximated with eased quarter-waves, in phase with the line. */
+@keyframes wave-dot {
+  0% {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
+  }
+  25% {
+    translate: 0 calc(-6px * var(--amp));
+    animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0.34);
+  }
+  50% {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
+  }
+  75% {
+    translate: 0 calc(6px * var(--amp));
+    animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0.34);
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+/* --- tooltip ---------------------------------------------------------- */
+
+.flow-tip {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  top: 0;
+  display: grid;
+  gap: 2px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: rgb(18 19 22 / 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.6);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--ink-2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.flow-tip strong {
+  font-weight: 620;
+  color: var(--ink-1);
+}
+
+.flow-card.is-hovering .flow-tip {
+  opacity: 1;
+}
+
+/* --- narrow cards ------------------------------------------------------ */
+
+@container stage (max-width: 600px) {
+  .flow-title {
+    font-size: 34px;
+  }
+
+  .port-name {
+    font-size: 10px;
+  }
+
+  .port-value {
+    font-size: 11.5px;
+  }
+
+  .source-title {
+    font-size: 12px;
+  }
+
+  .flow-foot {
+    gap: 14px;
+  }
+
+  .load {
+    padding-left: 14px;
+  }
+}

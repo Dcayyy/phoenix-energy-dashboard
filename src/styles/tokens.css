@@ -1,0 +1,42 @@
+@property --trace {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* 0 when the station is off, 1 when current flows. GSAP tweens it. */
+  --power: 0;
+
+  --backdrop: #282b31;
+  --app: #1b1d21;
+  --card-top: #25272c;
+  --card-bottom: #1e2024;
+  --raised: #2b2e33;
+  --raised-hi: #363a40;
+  --line: rgb(255 255 255 / 0.065);
+  --line-strong: rgb(255 255 255 / 0.11);
+
+  --ink-1: #f2f0ec;
+  --ink-2: #a4a7ad;
+  --ink-3: #70747b;
+
+  /* Ember is reserved for live current: it only glows where energy flows. */
+  --ember: #ff6a2b;
+  --ember-hot: #ff9a5e;
+  --ember-deep: #c8441a;
+  --glow: rgb(255 106 43 / calc(0.55 * var(--power)));
+
+  --steel-hi: #bcbec2;
+  --steel-lo: #8a8d92;
+  --steel-ink: #1a1b1e;
+
+  --radius-app: 26px;
+  --radius-card: 18px;
+  --gap: 10px;
+
+  --font: 'Mona Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
